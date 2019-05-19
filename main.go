@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"lenslocked.com/models"
 	"net/http"
+
+	"lenslocked.com/models"
 
 	"github.com/gorilla/mux"
 	"lenslocked.com/controllers"
@@ -13,7 +14,7 @@ const (
 	host     = "localhost"
 	port     = 5432
 	user     = "postgres"
-	password = "postgres"
+	password = "mysecretpassword"
 	dbname   = "lenslocked_dev"
 )
 
@@ -24,6 +25,7 @@ func main() {
 		panic(err)
 	}
 	defer us.Close()
+	us.DestructiveReset()
 	us.AutoMigrate()
 	staticC := controllers.NewStatic()
 	usersC := controllers.NewUsers(us)
@@ -33,5 +35,7 @@ func main() {
 	r.Handle("/faq", staticC.Faq).Methods("GET")
 	r.HandleFunc("/signup", usersC.New).Methods("GET")
 	r.HandleFunc("/signup", usersC.Create).Methods("POST")
+	r.Handle("/login", usersC.LoginView).Methods("GET")
+	r.HandleFunc("/login", usersC.Login).Methods("POST")
 	http.ListenAndServe(":3000", r)
 }
